@@ -8,10 +8,11 @@ Created on Thu Jan 18 16:54:35 2024
 import random
 
 def initialiser_plateau(nb_lignes, nb_colonnes):
-    return [[' ' for _ in range(nb_colonnes)] for _ in range(nb_lignes)]
+    return [[' ' for i in range(nb_colonnes)] for i in range(nb_lignes)]
 
 def afficher_plateau(plateau):
     for ligne in plateau:
+        
         print('|'.join(ligne))
         print('-' * (len(ligne) * 2 - 1))
 
@@ -19,41 +20,56 @@ def coup_valide(plateau, colonne):
     return 0 <= colonne < len(plateau[0]) and plateau[0][colonne] == ' '
 
 def obtenir_ligne(plateau, colonne):
+    """ Renvoie l'indice de la ligne libre la plus basse dans la colonne
+    donnée et -1 si la colonne est pleine """
+    index_ligne = -1
     for ligne in range(len(plateau) - 1, -1, -1):
         if plateau[ligne][colonne] == ' ':
-            return ligne
+            index_ligne = ligne
+            break
+    return index_ligne
+        
     
+
 def placer_piece(plateau, colonne, piece):
     plateau[obtenir_ligne(plateau, colonne)][colonne] = piece
-
-# def est_gagnant(plateau, piece):
-#     for ligne in range(len(plateau)):
-#         for colonne in range(len(plateau[0]) - 3):
-#             if all(plateau[ligne][colonne + i] == piece for i in range(4)):
-#                 return True
-
-#     for colonne in range(len(plateau[0])):
-#         for ligne in range(len(plateau) - 3):
-#             if all(plateau[ligne + i][colonne] == piece for i in range(4)):
-#                 return True
-
-#     for ligne in range(len(plateau) - 3):
-#         for colonne in range(len(plateau[0]) - 3):
-#             if all(plateau[ligne + i][colonne + i] == piece for i in range(4)):
-#                 return True
-
-#     for ligne in range(3, len(plateau)):
-#         for colonne in range(len(plateau[0]) - 3):
-#             if all(plateau[ligne - i][colonne + i] == piece for i in range(4)):
-#                 return True
-
-#     return False
+    
 
 def est_gagnant(plateau, piece, emplacement):
-    print(emplacement)
-    if emplacement[0] > 2:
-        print("chuis à plus dferozuifg")
+    # Si la pièce est a au moins 3 pièces en dessous d'elle,
+    # on regarde si il y a un alignement vertical
+    
+    nb_pieces_alignees = 1
+    if emplacement[0] <= 2:
+        for i in range(1, 4):
+            if plateau[emplacement[0] + i][emplacement[1]] == piece:
+                nb_pieces_alignees += 1
+            else:
+                nb_pieces_alignees = 1
+                break
+    if nb_pieces_alignees >= 4:
+        return True
+    # On regarde s'il y a un alignement horizontal
+    # On regarde d'abord le nombre de pièces de la même couleur de piece
+    # qui y sont collées à GAUCHE
+    for i in range(1, min(3, emplacement[1]) + 1): # Permet de ne pas sortir de la grille lors de la vérification
+        if plateau[emplacement[0]][emplacement[1] - i] == piece:
+            nb_pieces_alignees += 1
+        else:
+            break
+    # on ajoute à nb_pieces_alignees le nombre de pièces de la couleur de piece
+    # qui y sont collées à DROITE
+    for i in range(1, max(3, len(plateau[0]) - emplacement[1] - 1) + 1):
+        if plateau[emplacement[0]][emplacement[1] + i] == piece:
+            nb_pieces_alignees += 1
+        else:
+            break
+    if nb_pieces_alignees >= 4:
+        return True
+    else:
+        nb_pieces_alignees = 1
     return False
+
 
 def plateau_plein(plateau):
     return all(cellule != ' ' for ligne in plateau for cellule in ligne)
@@ -85,8 +101,7 @@ def jouer_joueur_contre_joueur(plateau, piece_actuelle):
         if coup_valide(plateau, colonne):
             placer_piece(plateau, colonne, piece_actuelle)
 
-            if est_gagnant(plateau, piece_actuelle,
-                           [obtenir_ligne(plateau, colonne), colonne]):
+            if est_gagnant(plateau, piece_actuelle, [obtenir_ligne(plateau, colonne) + 1, colonne]):
                 afficher_plateau(plateau)
                 print(f"Joueur {piece_actuelle} a gagné !")
                 break
@@ -122,8 +137,7 @@ def jouer_contre_ordinateur(plateau, piece_actuelle, nb_colonnes):
             placer_piece(plateau, colonne, piece_actuelle)
             print(f"L'ordinateur a choisi la colonne {colonne}.")
 
-        if est_gagnant(plateau, piece_actuelle,
-                       [obtenir_ligne(plateau, colonne), colonne]):
+        if est_gagnant(plateau, piece_actuelle, [obtenir_ligne(plateau, colonne) + 1, colonne]):
             afficher_plateau(plateau)
             if piece_actuelle == 'X':
                 print(f"Joueur {piece_actuelle} a gagné !")
