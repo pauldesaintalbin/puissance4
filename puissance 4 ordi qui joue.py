@@ -107,7 +107,7 @@ def jouer():
     mode_jeu = input("Choisissez le mode de jeu (1 pour jouer contre l'ordinateur, 2 pour joueur contre joueur): ")
 
     if mode_jeu == '1':
-        jouer_contre_ordinateur(plateau, piece_actuelle, nb_colonnes)
+        jouer_contre_ordinateur_random(plateau, piece_actuelle, nb_colonnes)
     elif mode_jeu == '2':
         jouer_joueur_contre_joueur(plateau, piece_actuelle)
     else:
@@ -138,7 +138,7 @@ def jouer_joueur_contre_joueur(plateau, piece_actuelle):
         else:
             print("Colonne invalide. Veuillez choisir à nouveau.")
 
-def jouer_contre_ordinateur(plateau, piece_actuelle, nb_colonnes):
+def jouer_contre_ordinateur_random(plateau, piece_actuelle, nb_colonnes):
     while True:
         afficher_plateau(plateau)
 
@@ -174,6 +174,31 @@ def jouer_contre_ordinateur(plateau, piece_actuelle, nb_colonnes):
             break
         else:
             piece_actuelle = 'O' if piece_actuelle == 'X' else 'X'
+
+def minimax(plateau_simule, plateau, piece, emplacement, profondeur, coups):
+    if est_gagnant(plateau_simule, "O", emplacement) and piece == "O":
+        plateau_simule = plateau
+        return coups
+    elif est_gagnant(plateau_simule, "X", emplacement) and piece == "X":
+        plateau_simule = plateau
+        return -coups
+    if profondeur == 0:
+        plateau_simule = plateau
+        return 0
+    if piece == "O":
+        meilleur_score = float("-inf")
+        for i in range(0, len(plateau_simule[0])):
+            if(coup_valide[i]):
+                placer_piece(plateau_simule, i, "O")
+                score = minimax(plateau_simule, "X", [obtenir_ligne(plateau_simule, i), i], profondeur - 1, coups + 1)
+                meilleur_score = min(meilleur_score, score)
+        return meilleur_score
+    else:
+        pire_score = float("inf")
+        for i in range(0, len(plateau_simule[0])):
+            score = minimax(plateau_simule, "X", [obtenir_ligne(plateau_simule, i), i], profondeur - 1, coups + 1)
+            pire_score = max(pire_score, score)
+        return pire_score
 
 if __name__ == "__main__":
     jouer()
