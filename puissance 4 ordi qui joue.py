@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Jan 18 16:54:35 2024
-
-@author: gabouchomon
-"""
-
 import random
 
 def initialiser_plateau(nb_lignes, nb_colonnes):
@@ -59,7 +52,7 @@ def est_gagnant(plateau, piece, emplacement):
             break
     # on ajoute à nb_pieces_alignees le nombre de pièces de la couleur de piece
     # qui y sont collées à DROITE
-    for i in range(1, max(3, len(plateau[0]) - emplacement[1] - 1) + 1):
+    for i in range(1, min(3, len(plateau[0]) - emplacement[1] - 1) + 1):
         if plateau[emplacement[0]][emplacement[1] + i] == piece:
             nb_pieces_alignees += 1
         else:
@@ -68,6 +61,14 @@ def est_gagnant(plateau, piece, emplacement):
         return True
     else:
         nb_pieces_alignees = 1
+    # diagonale haut gauche / bas droite
+    for i in range(1, min(emplacement[0], emplacement[1]) + 1):
+        if plateau[emplacement[0] - i][emplacement[1] - i] == piece:
+            nb_pieces_alignees += 1
+        else:
+            break
+    for i in range(1, min(len(plateau[0]) - emplacement[0] - 1, len(plateau[1]) - emplacement[1] - 1) + 1):
+        
     return False
 
 
