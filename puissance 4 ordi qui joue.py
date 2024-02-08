@@ -1,4 +1,4 @@
-import random
+import random, time
 
 def initialiser_plateau(nb_lignes, nb_colonnes):
     return [[' ' for i in range(nb_colonnes)] for i in range(nb_lignes)]
@@ -22,16 +22,14 @@ def obtenir_ligne(plateau, colonne):
             break
     return index_ligne
         
-    
-
 def placer_piece(plateau, colonne, piece):
     plateau[obtenir_ligne(plateau, colonne)][colonne] = piece
     
 
 def est_gagnant(plateau, piece, emplacement):
+    temps = time.time()
     # Si la pièce est a au moins 3 pièces en dessous d'elle,
     # on regarde si il y a un alignement vertical
-    
     nb_pieces_alignees = 1
     if emplacement[0] <= 2:
         for i in range(1, 4):
@@ -42,6 +40,7 @@ def est_gagnant(plateau, piece, emplacement):
                 break
     if nb_pieces_alignees >= 4:
         return True
+    
     # On regarde s'il y a un alignement horizontal
     # On regarde d'abord le nombre de pièces de la même couleur de piece
     # qui y sont collées à GAUCHE
@@ -61,14 +60,38 @@ def est_gagnant(plateau, piece, emplacement):
         return True
     else:
         nb_pieces_alignees = 1
+
     # diagonale haut gauche / bas droite
     for i in range(1, min(emplacement[0], emplacement[1]) + 1):
         if plateau[emplacement[0] - i][emplacement[1] - i] == piece:
             nb_pieces_alignees += 1
         else:
             break
-    for i in range(1, min(len(plateau[0]) - emplacement[0] - 1, len(plateau[1]) - emplacement[1] - 1) + 1):
-        
+    for i in range(1, min(len(plateau) - emplacement[0] - 1, len(plateau[0]) - emplacement[1] - 1) + 1):
+        if plateau[emplacement[0] + i][emplacement[1] + i] == piece:
+            nb_pieces_alignees += 1
+        else:
+            break
+    if nb_pieces_alignees >= 4:
+        return True
+    else:
+        nb_pieces_alignees = 1
+    
+    # diagonale haut droite / bas gauche
+    for i in range(1, min(len(plateau) - emplacement[0] - 1, emplacement[1]) + 1):
+        if plateau[emplacement[0] + i][emplacement[1] - i] == piece:
+            nb_pieces_alignees += 1
+        else:
+            break
+    for i in range(1, min(emplacement[0], len(plateau[0]) - emplacement[1] - 1) + 1):
+        if plateau[emplacement[0] - i][emplacement[1] + i] == piece:
+            nb_pieces_alignees += 1
+        else:
+            break
+    if nb_pieces_alignees >= 4:
+        return True
+    else:
+        nb_pieces_alignees = 1
     return False
 
 
