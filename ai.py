@@ -1,3 +1,2 @@
-for i in range(10):
-    for i in range(10):
-        print(i)
+import moteur
+moteur.initialiser_plateau(5, 5)

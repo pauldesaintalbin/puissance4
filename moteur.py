@@ -25,7 +25,28 @@ def obtenir_ligne(plateau, colonne):
 def placer_piece(plateau, colonne, piece):
     plateau[obtenir_ligne(plateau, colonne)][colonne] = piece
     
+def est_gagnant_minimax(plateau, piece):
+    for ligne in range(len(plateau)):
+        for colonne in range(len(plateau[0]) - 3):
+            if all(plateau[ligne][colonne + i] == piece for i in range(4)):
+                return True
 
+    for colonne in range(len(plateau[0])):
+        for ligne in range(len(plateau) - 3):
+            if all(plateau[ligne + i][colonne] == piece for i in range(4)):
+                return True
+
+    for ligne in range(len(plateau) - 3):
+        for colonne in range(len(plateau[0]) - 3):
+            if all(plateau[ligne + i][colonne + i] == piece for i in range(4)):
+                return True
+
+    for ligne in range(3, len(plateau)):
+        for colonne in range(len(plateau[0]) - 3):
+            if all(plateau[ligne - i][colonne + i] == piece for i in range(4)):
+                return True
+
+    return False
 def est_gagnant(plateau, piece, emplacement):
     # Si la pièce est a au moins 3 pièces en dessous d'elle,
     # on regarde si il y a un alignement vertical
@@ -191,8 +212,7 @@ def jouer_contre_ordinateur(plateau, piece_actuelle, nb_colonnes):
                 print("Colonne invalide. Veuillez choisir à nouveau.")
                 continue
         else:
-            random_colonne = random.randint(0, nb_colonnes - 1)
-            colonne = minimax(copy.deepcopy(plateau), "O", [obtenir_ligne(plateau, random_colonne), random_colonne], 5)[1][1]
+            colonne = minimax(copy.deepcopy(plateau), "O", 8, -numpy.inf, numpy.inf)[1]
             # while not coup_valide(plateau, colonne):
             #     colonne = random.randint(0, nb_colonnes - 1)
             placer_piece(plateau, colonne, piece_actuelle)
@@ -212,43 +232,53 @@ def jouer_contre_ordinateur(plateau, piece_actuelle, nb_colonnes):
         else:
             piece_actuelle = 'O' if piece_actuelle == 'X' else 'X'
 
-def minimax(plateau_simule, piece, emplacement, profondeur):
-    if est_gagnant(plateau_simule, "O", emplacement):
-        print("gagnant", piece, profondeur)
+def minimax(plateau_simule, piece, profondeur, alpha, beta):
+    if est_gagnant_minimax(plateau_simule, "O"):
+        # print("gagnant", piece, profondeur)
         
-        return [profondeur, emplacement]
-    elif est_gagnant(plateau_simule, "X", emplacement):
-        print("gagnant", piece, profondeur)
+        return profondeur, None
+    elif est_gagnant_minimax(plateau_simule, "X"):
+        # print("gagnant", piece, profondeur)
         
-        return [-profondeur, emplacement]
+        return -profondeur, None
     if profondeur == 0 or plateau_plein(plateau_simule):
         
         # print("joue")
-        return [0, emplacement]
+        return [0, None]
     if piece == "O":
-        meilleur_score = [-numpy.inf, emplacement]
-        for i in range(0, len(plateau_simule[0])):
-            if(coup_valide(plateau_simule, i)):
-                placer_piece(plateau_simule, i, "X")
-                score = minimax(copy.deepcopy(plateau_simule), "X", [obtenir_ligne(plateau_simule, i) + 1, i], profondeur - 1)
-                plateau_simule[obtenir_ligne(plateau_simule, i) + 1][i] = " "
-                if score[0] != -1 and score[0] != 0:
-                    print(score)
-                if meilleur_score[0] <= score[0]:
-                    meilleur_score = copy.deepcopy(score)
-        return meilleur_score
-    else:
-        pire_score = [numpy.inf, emplacement]
+        meilleure_colonne = 0
+        meilleur_score = -numpy.inf
         for i in range(0, len(plateau_simule[0])):
             if(coup_valide(plateau_simule, i)):
                 placer_piece(plateau_simule, i, "O")
-                score = minimax(copy.deepcopy(plateau_simule), "O", [obtenir_ligne(plateau_simule, i) + 1, i], profondeur - 1)
+                score = minimax(copy.deepcopy(plateau_simule), "X", profondeur - 1, alpha, beta)[0]
                 plateau_simule[obtenir_ligne(plateau_simule, i) + 1][i] = " "
-                if score[0] != -1 and score[0] != 0:
-                    print(score)
-                if pire_score[0] >= score[0]:
-                    pire_score = copy.deepcopy(score)
-        return pire_score
+                # if score != 0:
+                #     print(score)
+                if meilleur_score < score:
+                    meilleur_score = score
+                    meilleure_colonne = i
+                alpha = max(alpha, score)
+                if beta <= alpha:
+                    break
+        return meilleur_score, meilleure_colonne
+    else:
+        pire_colonne = 0
+        pire_score = numpy.inf
+        for i in range(0, len(plateau_simule[0])):
+            if(coup_valide(plateau_simule, i)):
+                placer_piece(plateau_simule, i, "X")
+                score = minimax(copy.deepcopy(plateau_simule), "O", profondeur - 1, alpha, beta)[0]
+                plateau_simule[obtenir_ligne(plateau_simule, i) + 1][i] = " "
+                # if score != 0:
+                #     print(score)
+                if pire_score > score:
+                    pire_score = score
+                    pire_colonne = i
+                beta = min(beta, score)
+                if beta <= alpha:
+                    break
+        return pire_score, pire_colonne
 
 if __name__ == "__main__":
     jouer()
