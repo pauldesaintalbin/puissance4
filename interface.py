@@ -1,6 +1,6 @@
 from tkinter import *
 from moteur import *
-
+from random import *
 
 window = Tk()
 window.title('Puissance 4')
@@ -45,6 +45,30 @@ panel.place(x=15,y=400)
 nombre_lignes=6
 nombre_colonnes=7
 plateau = [[' ' for i in range(nombre_colonnes)] for i_n in range(nombre_lignes)]  
+plateau[5][6]='X'
+def premier_joueur():
+    piece=randint(0,1)
+    if piece==0:
+        piece_actuelle='X'
+    else:
+        piece_actuelle='O'
+
+def jouer():
+    premier_joueur()
+    
+    
+def refresh_window():
+    # Redraw the window
+    frame.update()
+    frame.update_idletasks()
+    print("Refresh completed.")
+    
+    
+def modifier_plateau():
+    for i in range(nombre_colonnes):
+        for a in range(nombre_lignes):
+            plateau[a][i]="X"
+    create()
 
 #création d'une nouvelle fenetre   
 def create():
@@ -54,25 +78,22 @@ def create():
     win.config(bg='blue')
 
     frame = Frame(win, bg='#F2B33D')
-    piece='X'
-    for i in range(nombre_lignes):
-        for a in range(nombre_colonnes):
-            b2=Button(frame,command=changer_couleur)
-            b2.grid(row=i, column=a, sticky='ew',ipadx=15, ipady=10)
-            
+    for i in range(nombre_colonnes):
+        for a in range(nombre_lignes):
+            b2=Button(frame,command=modifier_plateau)
+            if plateau[a][i]=='X':
+                b2.configure(bg="red")
+            b2.grid(row=a, column=i, sticky='ew',ipadx=15, ipady=10)
+            row    = b2.grid_info()['row']      # Row of the button
+            column = b2.grid_info()['column']
     frame.pack(expand=True) 
     
     win.mainloop()
    
 
 
-def update_board():
-    for i in range(6):
-        for j in range(7):
-            if plateau[i, j] == 'X':
-                plateau[i][j].configure(text='', bg='yellow', relief='sunken', state='disabled')
-            elif plateau[i, j] == '0':
-                plateau[i][j].configure(text='', bg='red', relief='sunken', state='disabled')
+
+    
     
 # bouton cliquable
 b1 = Button(window, text = "Commencer la partie",command=create)
