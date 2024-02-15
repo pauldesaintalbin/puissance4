@@ -19,94 +19,32 @@ def obtenir_ligne(plateau, colonne):
 def stocker_piece(plateau, colonne, piece):
     plateau[obtenir_ligne(plateau, colonne)][colonne] = piece
     
-def est_gagnant_minimax(plateau, piece):
+def est_gagnant(plateau, piece):
     for ligne in range(len(plateau)):
         for colonne in range(len(plateau[0]) - 3):
             if all(plateau[ligne][colonne + i] == piece for i in range(4)):
-                return True
+                jetons_gagnants = [[ligne, colonne + i] for i in range(4)]
+                return True, jetons_gagnants
 
     for colonne in range(len(plateau[0])):
         for ligne in range(len(plateau) - 3):
             if all(plateau[ligne + i][colonne] == piece for i in range(4)):
-                return True
+                jetons_gagnants = [[ligne + i, colonne] for i in range(4)]
+                return True, jetons_gagnants
 
     for ligne in range(len(plateau) - 3):
         for colonne in range(len(plateau[0]) - 3):
             if all(plateau[ligne + i][colonne + i] == piece for i in range(4)):
-                return True
+                jetons_gagnants = [[ligne + i, colonne + i] for i in range(4)]
+                return True, jetons_gagnants
 
     for ligne in range(3, len(plateau)):
         for colonne in range(len(plateau[0]) - 3):
             if all(plateau[ligne - i][colonne + i] == piece for i in range(4)):
-                return True
+                jetons_gagnants = [[ligne - i, colonne + i] for i in range(4)]
+                return True, jetons_gagnants
 
-    return False
-def est_gagnant(plateau, piece, emplacement):
-    # Si la pièce est a au moins 3 pièces en dessous d'elle,
-    # on regarde si il y a un alignement vertical
-    nb_pieces_alignees = 1
-    if emplacement[0] <= 2:
-        for i in range(1, 4):
-            if plateau[emplacement[0] + i][emplacement[1]] == piece:
-                nb_pieces_alignees += 1
-            else:
-                nb_pieces_alignees = 1
-                break
-    if nb_pieces_alignees >= 4:
-        return True
-    
-    # On regarde s'il y a un alignement horizontal
-    # On regarde d'abord le nombre de pièces de la même couleur de piece
-    # qui y sont collées à GAUCHE
-    for i in range(1, min(3, emplacement[1]) + 1): # Permet de ne pas sortir de la grille lors de la vérification
-        if plateau[emplacement[0]][emplacement[1] - i] == piece:
-            nb_pieces_alignees += 1
-        else:
-            break
-    # on ajoute à nb_pieces_alignees le nombre de pièces de la couleur de piece
-    # qui y sont collées à DROITE
-    for i in range(1, min(3, len(plateau[0]) - emplacement[1] - 1) + 1):
-        if plateau[emplacement[0]][emplacement[1] + i] == piece:
-            nb_pieces_alignees += 1
-        else:
-            break
-    if nb_pieces_alignees >= 4:
-        return True
-    else:
-        nb_pieces_alignees = 1
-
-    # diagonale haut gauche / bas droite
-    for i in range(1, min(emplacement[0], emplacement[1]) + 1):
-        if plateau[emplacement[0] - i][emplacement[1] - i] == piece:
-            nb_pieces_alignees += 1
-        else:
-            break
-    for i in range(1, min(len(plateau) - emplacement[0] - 1, len(plateau[0]) - emplacement[1] - 1) + 1):
-        if plateau[emplacement[0] + i][emplacement[1] + i] == piece:
-            nb_pieces_alignees += 1
-        else:
-            break
-    if nb_pieces_alignees >= 4:
-        return True
-    else:
-        nb_pieces_alignees = 1
-    
-    # diagonale haut droite / bas gauche
-    for i in range(1, min(len(plateau) - emplacement[0] - 1, emplacement[1]) + 1):
-        if plateau[emplacement[0] + i][emplacement[1] - i] == piece:
-            nb_pieces_alignees += 1
-        else:
-            break
-    for i in range(1, min(emplacement[0], len(plateau[0]) - emplacement[1] - 1) + 1):
-        if plateau[emplacement[0] - i][emplacement[1] + i] == piece:
-            nb_pieces_alignees += 1
-        else:
-            break
-    if nb_pieces_alignees >= 4:
-        return True
-    else:
-        nb_pieces_alignees = 1
-    return False
+    return False, None
 
 
 def plateau_plein(plateau):
@@ -114,11 +52,11 @@ def plateau_plein(plateau):
 
 
 def minimax(plateau_simule, piece, profondeur, alpha, beta):
-    if est_gagnant_minimax(plateau_simule, "O"):
+    if est_gagnant(plateau_simule, "O")[0]:
         # print("gagnant", piece, profondeur)
         
         return profondeur, None
-    elif est_gagnant_minimax(plateau_simule, "X"):
+    elif est_gagnant(plateau_simule, "X")[0]:
         # print("gagnant", piece, profondeur)
         
         return -profondeur, None
