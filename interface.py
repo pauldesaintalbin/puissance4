@@ -1,7 +1,7 @@
 from tkinter import *
 from moteur import *
 from random import *
-
+import threading
 window = Tk()
 window.title('Puissance 4')
 window.geometry('1000x800')
@@ -44,26 +44,39 @@ myEntry.place(x=210,y=303)
 
 
     
-def bouton_clique(plateau, boutons, jcj, colonne, piece_actuelle):
+def placer_piece(plateau, boutons, jcj, colonne, piece_actuelle):
     # global piece_actuelle
     if coup_valide(plateau, colonne):
-        placer_piece(plateau, colonne, piece_actuelle[0])
+        stocker_piece(plateau, colonne, piece_actuelle[0])
         couleur = "red" if piece_actuelle[0] == "X" else "yellow"
         boutons[obtenir_ligne(plateau, colonne) + 1][colonne].configure(bg=couleur)
         print("piece posee")
         if est_gagnant(plateau, piece_actuelle[0], [obtenir_ligne(plateau, colonne) + 1, colonne]):
             print("gagnant")
-        if jcj:
+        if jcj: # si le mode de jeu est joueur contre joueur, c'est à l'autre joueur de jouer
             piece_actuelle[0] = "X" if piece_actuelle[0] == "O" else "O"
-        else:
-            colonne_ordinateur = minimax(copy.deepcopy(plateau), "O", 8, -numpy.inf, numpy.inf)[1]
-            placer_piece(plateau, colonne_ordinateur, "O")
-            couleur = "yellow"
-            boutons[obtenir_ligne(plateau, colonne) + 1][colonne].configure(bg=couleur)
-            print("piece ordi posee")
-            if est_gagnant(plateau, piece_actuelle[0], [obtenir_ligne(plateau, colonne) + 1, colonne]):
-                print("orid gagnant")
+        else: # sinon l'ordinateur joue
+            #on empêche le joueur de jouer pendant que l'ordinateur réfléchis
+            for ligne in range(len(boutons)):
+                for colonne in range(len(boutons[0])):
+                    boutons[ligne][colonne]["state"] = DISABLED
+            threading.Thread(target=lambda plateau = plateau, boutons = boutons:
+                ordinateur_placer_piece(plateau, boutons)).start()
     
+def ordinateur_placer_piece(plateau, boutons):
+    print("sqdfglsqdgkj")
+    colonne_ordi = minimax(copy.deepcopy(plateau), "O", 8, -numpy.inf, numpy.inf)[1]
+    print("ordi :", colonne_ordi)
+    stocker_piece(plateau, colonne_ordi, "O")
+    boutons[obtenir_ligne(plateau, colonne_ordi) + 1][colonne_ordi].configure(bg="yellow")
+    for ligne in range(len(boutons)):
+        for colonne in range(len(boutons[0])):
+            boutons[ligne][colonne]["state"] = NORMAL
+    if est_gagnant(plateau, "O", [obtenir_ligne(plateau, colonne_ordi) + 1, colonne_ordi]):
+            print("gagnant")
+            for ligne in range(len(boutons)):
+                for colonne in range(len(boutons[0])):
+                    boutons[ligne][colonne]["state"] = DISABLED
 
 #création d'une nouvelle fenetre   
 def creer_frame_jeu(joueur_contre_joueur):
@@ -92,7 +105,7 @@ def creer_frame_jeu(joueur_contre_joueur):
     # Ajout de l'événement au clic d'un bouton
     for ligne in range(len(boutons)):
         for colonne in range(len(boutons[0])):
-            boutons[ligne][colonne]["command"] = lambda colonne = colonne, plateau = plateau, piece_actuelle = piece_actuelle: bouton_clique(plateau, boutons, jcj, colonne, piece_actuelle)
+            boutons[ligne][colonne]["command"] = lambda colonne = colonne, plateau = plateau, piece_actuelle = piece_actuelle: placer_piece(plateau, boutons, jcj, colonne, piece_actuelle)
     frame_jeu.pack(expand=True) 
     
     win.mainloop()

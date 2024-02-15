@@ -22,7 +22,7 @@ def obtenir_ligne(plateau, colonne):
             break
     return index_ligne
         
-def placer_piece(plateau, colonne, piece):
+def stocker_piece(plateau, colonne, piece):
     plateau[obtenir_ligne(plateau, colonne)][colonne] = piece
     
 def est_gagnant_minimax(plateau, piece):
@@ -143,7 +143,7 @@ def jouer_joueur_contre_joueur(plateau, piece_actuelle):
             continue
 
         if coup_valide(plateau, colonne):
-            placer_piece(plateau, colonne, piece_actuelle)
+            stocker_piece(plateau, colonne, piece_actuelle)
 
             if est_gagnant(plateau, piece_actuelle, [obtenir_ligne(plateau, colonne) + 1, colonne]):
                 afficher_plateau(plateau)
@@ -170,7 +170,7 @@ def jouer_contre_ordinateur_random(plateau, piece_actuelle, nb_colonnes):
                 continue
             
             if coup_valide(plateau, colonne):
-                placer_piece(plateau, colonne, piece_actuelle)
+                stocker_piece(plateau, colonne, piece_actuelle)
             else:
                 print("Colonne invalide. Veuillez choisir à nouveau.")
                 continue
@@ -178,7 +178,7 @@ def jouer_contre_ordinateur_random(plateau, piece_actuelle, nb_colonnes):
             colonne = random.randint(0, nb_colonnes - 1)
             while not coup_valide(plateau, colonne):
                 colonne = random.randint(0, nb_colonnes - 1)
-            placer_piece(plateau, colonne, piece_actuelle)
+            stocker_piece(plateau, colonne, piece_actuelle)
             print(f"L'ordinateur a choisi la colonne {colonne}.")
 
         if est_gagnant(plateau, piece_actuelle, [obtenir_ligne(plateau, colonne) + 1, colonne]):
@@ -207,7 +207,7 @@ def jouer_contre_ordinateur(plateau, piece_actuelle, nb_colonnes):
                 continue
             
             if coup_valide(plateau, colonne):
-                placer_piece(plateau, colonne, piece_actuelle)
+                stocker_piece(plateau, colonne, piece_actuelle)
             else:
                 print("Colonne invalide. Veuillez choisir à nouveau.")
                 continue
@@ -215,7 +215,7 @@ def jouer_contre_ordinateur(plateau, piece_actuelle, nb_colonnes):
             colonne = minimax(copy.deepcopy(plateau), "O", 8, -numpy.inf, numpy.inf)[1]
             # while not coup_valide(plateau, colonne):
             #     colonne = random.randint(0, nb_colonnes - 1)
-            placer_piece(plateau, colonne, piece_actuelle)
+            stocker_piece(plateau, colonne, piece_actuelle)
             print(f"L'ordinateur a choisi la colonne {colonne}.")
 
         if est_gagnant(plateau, piece_actuelle, [obtenir_ligne(plateau, colonne) + 1, colonne]):
@@ -250,7 +250,7 @@ def minimax(plateau_simule, piece, profondeur, alpha, beta):
         meilleur_score = -numpy.inf
         for i in range(0, len(plateau_simule[0])):
             if(coup_valide(plateau_simule, i)):
-                placer_piece(plateau_simule, i, "O")
+                stocker_piece(plateau_simule, i, "O")
                 score = minimax(copy.deepcopy(plateau_simule), "X", profondeur - 1, alpha, beta)[0]
                 plateau_simule[obtenir_ligne(plateau_simule, i) + 1][i] = " "
                 # if score != 0:
@@ -267,7 +267,7 @@ def minimax(plateau_simule, piece, profondeur, alpha, beta):
         pire_score = numpy.inf
         for i in range(0, len(plateau_simule[0])):
             if(coup_valide(plateau_simule, i)):
-                placer_piece(plateau_simule, i, "X")
+                stocker_piece(plateau_simule, i, "X")
                 score = minimax(copy.deepcopy(plateau_simule), "O", profondeur - 1, alpha, beta)[0]
                 plateau_simule[obtenir_ligne(plateau_simule, i) + 1][i] = " "
                 # if score != 0:
