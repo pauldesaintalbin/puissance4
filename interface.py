@@ -42,7 +42,10 @@ myEntry.place(x=210,y=303)
 # panel = Label(window, image = img, bg="#2cdf85")
 # panel.place(x=15,y=400)
 
-
+def fin_de_partie(boutons):
+    for ligne in range(len(boutons)):
+        for colonne in range(len(boutons[0])):
+            boutons[ligne][colonne]["state"] = DISABLED
     
 def placer_piece(plateau, boutons, jcj, colonne, piece_actuelle):
     # global piece_actuelle
@@ -52,16 +55,17 @@ def placer_piece(plateau, boutons, jcj, colonne, piece_actuelle):
         boutons[obtenir_ligne(plateau, colonne) + 1][colonne].configure(bg=couleur)
         print("piece posee")
         if est_gagnant(plateau, piece_actuelle[0], [obtenir_ligne(plateau, colonne) + 1, colonne]):
-            print("gagnant")
-        if jcj: # si le mode de jeu est joueur contre joueur, c'est à l'autre joueur de jouer
-            piece_actuelle[0] = "X" if piece_actuelle[0] == "O" else "O"
-        else: # sinon l'ordinateur joue
-            #on empêche le joueur de jouer pendant que l'ordinateur réfléchis
-            for ligne in range(len(boutons)):
-                for colonne in range(len(boutons[0])):
-                    boutons[ligne][colonne]["state"] = DISABLED
-            threading.Thread(target=lambda plateau = plateau, boutons = boutons:
-                ordinateur_placer_piece(plateau, boutons)).start()
+            fin_de_partie(boutons)
+        else:
+            if jcj: # si le mode de jeu est joueur contre joueur, c'est à l'autre joueur de jouer
+                piece_actuelle[0] = "X" if piece_actuelle[0] == "O" else "O"
+            else: # sinon l'ordinateur joue
+                #on empêche le joueur de jouer pendant que l'ordinateur réfléchis
+                for ligne in range(len(boutons)):
+                    for colonne in range(len(boutons[0])):
+                        boutons[ligne][colonne]["state"] = DISABLED
+                threading.Thread(target=lambda plateau = plateau, boutons = boutons:
+                    ordinateur_placer_piece(plateau, boutons)).start()
     
 def ordinateur_placer_piece(plateau, boutons):
     print("sqdfglsqdgkj")
@@ -73,10 +77,7 @@ def ordinateur_placer_piece(plateau, boutons):
         for colonne in range(len(boutons[0])):
             boutons[ligne][colonne]["state"] = NORMAL
     if est_gagnant(plateau, "O", [obtenir_ligne(plateau, colonne_ordi) + 1, colonne_ordi]):
-            print("gagnant")
-            for ligne in range(len(boutons)):
-                for colonne in range(len(boutons[0])):
-                    boutons[ligne][colonne]["state"] = DISABLED
+            fin_de_partie(boutons)
 
 #création d'une nouvelle fenetre   
 def creer_frame_jeu(joueur_contre_joueur):
