@@ -44,49 +44,61 @@ panel.place(x=15,y=400)
 
 nombre_lignes=6
 nombre_colonnes=7
+piece_actuelle = "X"
 plateau = [[' ' for i in range(nombre_colonnes)] for i_n in range(nombre_lignes)]  
-plateau[5][6]='X'
-def premier_joueur():
-    piece=randint(0,1)
-    if piece==0:
-        piece_actuelle='X'
-    else:
-        piece_actuelle='O'
+
 
 def jouer():
     premier_joueur()
     
     
-def refresh_window():
-    # Redraw the window
-    frame.update()
-    frame.update_idletasks()
-    print("Refresh completed.")
+
     
+def bouton_clique(colonne):
+    global piece_actuelle
+    placer_piece(plateau, colonne, piece_actuelle)
+    couleur = "red" if piece_actuelle == "X" else "yellow"
+    boutons[colonne][obtenir_ligne(plateau, colonne) + 1].configure(bg=couleur)
+    print("piece posee")
+    if est_gagnant(plateau, piece_actuelle, [obtenir_ligne(plateau, colonne) + 1, colonne]):
+        print("gagnant")
+        
+    if jcj:
+            
+        piece_actuelle = "X" if piece_actuelle == "O" else "O"
+    if jcj == False:
+        colonne_ordinateur = minimax(copy.deepcopy(plateau), "O", 8, -numpy.inf, numpy.inf)[1]
+        placer_piece(plateau, colonne_ordinateur, "O")
+        couleur = "yellow"
+        boutons[colonne][obtenir_ligne(plateau, colonne) + 1].configure(bg=couleur)
+        print("piece ordi posee")
+        if est_gagnant(plateau, piece_actuelle, [obtenir_ligne(plateau, colonne) + 1, colonne]):
+            print("orid gagnant")
     
-def modifier_plateau():
-    for i in range(nombre_colonnes):
-        for a in range(nombre_lignes):
-            plateau[a][i]="X"
-    create()
 
 #création d'une nouvelle fenetre   
-def create():
+def creer_frame_jeu(joueur_contre_joueur):
+    global frame_jeu, boutons, jcj
+    
+    jcj = True if joueur_contre_joueur else False
+        
     win = Tk()
     win.title('Grille de jeu')
     win.geometry('400x300')
     win.config(bg='blue')
 
-    frame = Frame(win, bg='#F2B33D')
+    frame_jeu = Frame(win, bg='#F2B33D')
+    
+    boutons = []
     for i in range(nombre_colonnes):
+        ligne_boutons = []
         for a in range(nombre_lignes):
-            b2=Button(frame,command=modifier_plateau)
-            if plateau[a][i]=='X':
-                b2.configure(bg="red")
-            b2.grid(row=a, column=i, sticky='ew',ipadx=15, ipady=10)
-            row    = b2.grid_info()['row']      # Row of the button
-            column = b2.grid_info()['column']
-    frame.pack(expand=True) 
+            bouton=Button(frame_jeu, command=lambda colonne = i: bouton_clique(colonne) )
+            bouton.grid(row=a, column=i, sticky='ew',ipadx=15, ipady=10)
+            ligne_boutons.append(bouton)
+        boutons.append(ligne_boutons)
+            
+    frame_jeu.pack(expand=True) 
     
     win.mainloop()
    
@@ -96,8 +108,11 @@ def create():
     
     
 # bouton cliquable
-b1 = Button(window, text = "Commencer la partie",command=create)
+b1 = Button(window, text = "Jouer à 2",command=lambda jcj = True: creer_frame_jeu(jcj))
 b1.place(relx = 1, x =-300, y = 300, anchor = NE)
+
+b2 = Button(window, text = "Jouer contre l'ordinateur",command=lambda jcj = False: creer_frame_jeu(jcj))
+b2.place(relx = 1, x =-300, y = 350, anchor = NE)
 
 
 
