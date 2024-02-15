@@ -6,7 +6,7 @@ window = Tk()
 window.title('Puissance 4')
 window.geometry('1000x800')
 window.minsize(500, 300)
-window.iconbitmap("jeton/logo.ico")
+# window.iconbitmap("jeton/logo.ico")
 window.config(background='#2cdf85')
 
 
@@ -37,51 +37,43 @@ myEntry = Entry(window, width=20)
 myEntry.place(x=210,y=303)
 
 # mettre une image
-from PIL import ImageTk,Image
-img = ImageTk.PhotoImage(Image.open("jeton/logo.ico"))
-panel = Label(window, image = img, bg="#2cdf85")
-panel.place(x=15,y=400)
+# from PIL import ImageTk,Image
+# img = ImageTk.PhotoImage(Image.open("jeton/logo.ico"))
+# panel = Label(window, image = img, bg="#2cdf85")
+# panel.place(x=15,y=400)
 
-nombre_lignes=6
-nombre_colonnes=7
-piece_actuelle = "X"
-plateau = [[' ' for i in range(nombre_colonnes)] for i_n in range(nombre_lignes)]  
-
-
-def jouer():
-    premier_joueur()
-    
-    
 
     
-def bouton_clique(colonne):
-    global piece_actuelle
-    placer_piece(plateau, colonne, piece_actuelle)
-    couleur = "red" if piece_actuelle == "X" else "yellow"
-    boutons[colonne][obtenir_ligne(plateau, colonne) + 1].configure(bg=couleur)
-    print("piece posee")
-    if est_gagnant(plateau, piece_actuelle, [obtenir_ligne(plateau, colonne) + 1, colonne]):
-        print("gagnant")
-        
-    if jcj:
-            
-        piece_actuelle = "X" if piece_actuelle == "O" else "O"
-    if jcj == False:
-        colonne_ordinateur = minimax(copy.deepcopy(plateau), "O", 8, -numpy.inf, numpy.inf)[1]
-        placer_piece(plateau, colonne_ordinateur, "O")
-        couleur = "yellow"
-        boutons[colonne][obtenir_ligne(plateau, colonne) + 1].configure(bg=couleur)
-        print("piece ordi posee")
-        if est_gagnant(plateau, piece_actuelle, [obtenir_ligne(plateau, colonne) + 1, colonne]):
-            print("orid gagnant")
+def bouton_clique(plateau, boutons, jcj, colonne, piece_actuelle):
+    # global piece_actuelle
+    if coup_valide(plateau, colonne):
+        placer_piece(plateau, colonne, piece_actuelle[0])
+        couleur = "red" if piece_actuelle[0] == "X" else "yellow"
+        boutons[obtenir_ligne(plateau, colonne) + 1][colonne].configure(bg=couleur)
+        print("piece posee")
+        if est_gagnant(plateau, piece_actuelle[0], [obtenir_ligne(plateau, colonne) + 1, colonne]):
+            print("gagnant")
+        if jcj:
+            piece_actuelle[0] = "X" if piece_actuelle[0] == "O" else "O"
+        else:
+            colonne_ordinateur = minimax(copy.deepcopy(plateau), "O", 8, -numpy.inf, numpy.inf)[1]
+            placer_piece(plateau, colonne_ordinateur, "O")
+            couleur = "yellow"
+            boutons[obtenir_ligne(plateau, colonne) + 1][colonne].configure(bg=couleur)
+            print("piece ordi posee")
+            if est_gagnant(plateau, piece_actuelle[0], [obtenir_ligne(plateau, colonne) + 1, colonne]):
+                print("orid gagnant")
     
 
 #création d'une nouvelle fenetre   
 def creer_frame_jeu(joueur_contre_joueur):
-    global frame_jeu, boutons, jcj
-    
+    # global piece_actuelle
+    piece_actuelle = ["X"] # Cette variable contient le joueur à qui c'est le tour, 
+    # stockée dans un tableau pour que lorsqu'on modifie extérieurement sa valeur, 
+    # cette fonction puisse y accéder (les modifications des éléments de tableaux 
+    # sont globales en python)
     jcj = True if joueur_contre_joueur else False
-        
+    plateau = initialiser_plateau(6, 7)
     win = Tk()
     win.title('Grille de jeu')
     win.geometry('400x300')
@@ -90,14 +82,17 @@ def creer_frame_jeu(joueur_contre_joueur):
     frame_jeu = Frame(win, bg='#F2B33D')
     
     boutons = []
-    for i in range(nombre_colonnes):
+    for ligne in range(len(plateau)):
         ligne_boutons = []
-        for a in range(nombre_lignes):
-            bouton=Button(frame_jeu, command=lambda colonne = i: bouton_clique(colonne) )
-            bouton.grid(row=a, column=i, sticky='ew',ipadx=15, ipady=10)
+        for colonne in range(len(plateau[0])):
+            bouton=Button(frame_jeu)
+            bouton.grid(row=ligne, column=colonne, sticky='ew',ipadx=15, ipady=10)
             ligne_boutons.append(bouton)
         boutons.append(ligne_boutons)
-            
+    # Ajout de l'événement au clic d'un bouton
+    for ligne in range(len(boutons)):
+        for colonne in range(len(boutons[0])):
+            boutons[ligne][colonne]["command"] = lambda colonne = colonne, plateau = plateau, piece_actuelle = piece_actuelle: bouton_clique(plateau, boutons, jcj, colonne, piece_actuelle)
     frame_jeu.pack(expand=True) 
     
     win.mainloop()
@@ -108,10 +103,10 @@ def creer_frame_jeu(joueur_contre_joueur):
     
     
 # bouton cliquable
-b1 = Button(window, text = "Jouer à 2",command=lambda jcj = True: creer_frame_jeu(jcj))
+b1 = Button(window, text = "Jouer à 2", command=lambda jcj = True: creer_frame_jeu(jcj))
 b1.place(relx = 1, x =-300, y = 300, anchor = NE)
 
-b2 = Button(window, text = "Jouer contre l'ordinateur",command=lambda jcj = False: creer_frame_jeu(jcj))
+b2 = Button(window, text = "Jouer contre l'ordinateur", command=lambda  jcj = False: creer_frame_jeu(jcj))
 b2.place(relx = 1, x =-300, y = 350, anchor = NE)
 
 
