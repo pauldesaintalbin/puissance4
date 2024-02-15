@@ -1,7 +1,15 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Feb 15 19:35:37 2024
+
+@author: PC ASUS
+"""
+
 from tkinter import *
 from moteur import *
 from random import *
 import threading
+
 window = Tk()
 window.title('Puissance 4')
 window.geometry('1000x800')
@@ -22,14 +30,14 @@ label_title=Label(window, text="Règle du jeu:", font=("arial", 20), bg="#2cdf85
 label_title.place(x=15,y=100)
 
 #deuxieme texte
-label_subtitle=Label(window, text="_Le but du jeu est d'aligner 4 jetons de sa couleur, horizontalement, verticalement ou en diagonale, avant son adversaire.", font=("arial", 12), bg="#2cdf85")
-label_subtitle.place(x=15,y=140)
-label_subtitle=Label(window, text="_Le jeu se joue à deux, avec un plateau de 42 emplacements répartis en 6 lignes et 7 colonnes, et 42 jetons de 2 couleurs différentes.", font=("arial", 12), bg="#2cdf85")
-label_subtitle.place(x=15,y=170)
-label_subtitle=Label(window, text="_Chaque joueur, à tour de rôle, choisit une colonne et y place un de ses jetons. Le jeton tombe en bas de la colonne.", font=("arial", 12), bg="#2cdf85")
-label_subtitle.place(x=15,y=200)
-label_subtitle=Label(window, text="_La partie se termine quand un joueur aligne 4 jetons de sa couleur, ou quand le plateau est rempli sans alignement possible", font=("arial", 12), bg="#2cdf85")
-label_subtitle.place(x=15,y=230)
+label_subtitle1=Label(window, text="_Le but du jeu est d'aligner 4 jetons de sa couleur, horizontalement, verticalement ou en diagonale, avant son adversaire.", font=("arial", 12), bg="#2cdf85")
+label_subtitle1.place(x=15,y=140)
+label_subtitle2=Label(window, text="_Le jeu se joue à deux, avec un plateau de 42 emplacements répartis en 6 lignes et 7 colonnes, et 42 jetons de 2 couleurs différentes.", font=("arial", 12), bg="#2cdf85")
+label_subtitle2.place(x=15,y=170)
+label_subtitle3=Label(window, text="_Chaque joueur, à tour de rôle, choisit une colonne et y place un de ses jetons. Le jeton tombe en bas de la colonne.", font=("arial", 12), bg="#2cdf85")
+label_subtitle3.place(x=15,y=200)
+label_subtitle4=Label(window, text="_La partie se termine quand un joueur aligne 4 jetons de sa couleur, ou quand le plateau est rempli sans alignement possible", font=("arial", 12), bg="#2cdf85")
+label_subtitle4.place(x=15,y=230)
 
 label_subtitle=Label(window, text="Entrez votre nom de joueur:", font=("arial", 12), bg="#2cdf85")
 label_subtitle.place(x=15,y=300)
@@ -42,10 +50,7 @@ myEntry.place(x=210,y=303)
 # panel = Label(window, image = img, bg="#2cdf85")
 # panel.place(x=15,y=400)
 
-def fin_de_partie(boutons):
-    for ligne in range(len(boutons)):
-        for colonne in range(len(boutons[0])):
-            boutons[ligne][colonne]["state"] = DISABLED
+
     
 def placer_piece(plateau, boutons, jcj, colonne, piece_actuelle):
     # global piece_actuelle
@@ -55,17 +60,22 @@ def placer_piece(plateau, boutons, jcj, colonne, piece_actuelle):
         boutons[obtenir_ligne(plateau, colonne) + 1][colonne].configure(bg=couleur)
         print("piece posee")
         if est_gagnant(plateau, piece_actuelle[0], [obtenir_ligne(plateau, colonne) + 1, colonne]):
-            fin_de_partie(boutons)
-        else:
-            if jcj: # si le mode de jeu est joueur contre joueur, c'est à l'autre joueur de jouer
-                piece_actuelle[0] = "X" if piece_actuelle[0] == "O" else "O"
-            else: # sinon l'ordinateur joue
-                #on empêche le joueur de jouer pendant que l'ordinateur réfléchis
-                for ligne in range(len(boutons)):
-                    for colonne in range(len(boutons[0])):
-                        boutons[ligne][colonne]["state"] = DISABLED
-                threading.Thread(target=lambda plateau = plateau, boutons = boutons:
-                    ordinateur_placer_piece(plateau, boutons)).start()
+            if couleur=="red":
+                messagebox.showinfo("Victoire", f"Victoire de rouge !")
+            else:
+                messagebox.showinfo("Victoire", f"Victoire de jaune !")
+            for ligne in range(len(boutons)):
+                for colonne in range(len(boutons[0])):
+                    boutons[ligne][colonne]["state"] = DISABLED
+        if jcj: # si le mode de jeu est joueur contre joueur, c'est à l'autre joueur de jouer
+            piece_actuelle[0] = "X" if piece_actuelle[0] == "O" else "O"
+        else: # sinon l'ordinateur joue
+            #on empêche le joueur de jouer pendant que l'ordinateur réfléchis
+            for ligne in range(len(boutons)):
+                for colonne in range(len(boutons[0])):
+                    boutons[ligne][colonne]["state"] = DISABLED
+            threading.Thread(target=lambda plateau = plateau, boutons = boutons:
+                ordinateur_placer_piece(plateau, boutons)).start()
     
 def ordinateur_placer_piece(plateau, boutons):
     print("sqdfglsqdgkj")
@@ -77,7 +87,11 @@ def ordinateur_placer_piece(plateau, boutons):
         for colonne in range(len(boutons[0])):
             boutons[ligne][colonne]["state"] = NORMAL
     if est_gagnant(plateau, "O", [obtenir_ligne(plateau, colonne_ordi) + 1, colonne_ordi]):
-            fin_de_partie(boutons)
+            messagebox.showinfo("Victoire", f"Victoire de l'ordi !")
+            print("gagnant")
+            for ligne in range(len(boutons)):
+                for colonne in range(len(boutons[0])):
+                    boutons[ligne][colonne]["state"] = DISABLED
 
 #création d'une nouvelle fenetre   
 def creer_frame_jeu(joueur_contre_joueur):
@@ -130,14 +144,3 @@ b2.place(relx = 1, x =-300, y = 350, anchor = NE)
 
 #Afficher la fenetre
 window.mainloop()
-
-
-
-
-
-
-   
-
-   
-
-
