@@ -1,4 +1,4 @@
-import numpy, copy
+import numpy, copy, random
 
 def initialiser_plateau(nb_lignes, nb_colonnes):
     return [[' ' for i in range(nb_colonnes)] for i in range(nb_lignes)]
@@ -129,6 +129,8 @@ def minimax(plateau_simule, piece, profondeur, alpha, beta):
     if piece == "O":
         meilleure_colonne = 0
         meilleur_score = -numpy.inf
+        liste_scores = []
+        pas_de_meilleur_score = True
         for i in range(0, len(plateau_simule[0])):
             if(coup_valide(plateau_simule, i)):
                 stocker_piece(plateau_simule, i, "O")
@@ -139,24 +141,38 @@ def minimax(plateau_simule, piece, profondeur, alpha, beta):
                 if meilleur_score < score:
                     meilleur_score = score
                     meilleure_colonne = i
+                liste_scores.append([score, i])
                 alpha = max(alpha, score)
                 if beta <= alpha:
                     break
+        for i in range(len(liste_scores) - 1):
+            if liste_scores[i][0] != liste_scores[i + 1][0]:
+                pas_de_meilleur_score = False
+                break
+        if pas_de_meilleur_score:
+            return liste_scores[0][0], random.choice(liste_scores)[1]
         return meilleur_score, meilleure_colonne
     else:
         pire_colonne = 0
         pire_score = numpy.inf
+        liste_scores = []
+        pas_de_pire_score = True
         for i in range(0, len(plateau_simule[0])):
             if(coup_valide(plateau_simule, i)):
                 stocker_piece(plateau_simule, i, "X")
                 score = minimax(copy.deepcopy(plateau_simule), "O", profondeur - 1, alpha, beta)[0]
                 plateau_simule[obtenir_ligne(plateau_simule, i) + 1][i] = " "
-                # if score != 0:
-                #     print(score)
                 if pire_score > score:
                     pire_score = score
                     pire_colonne = i
+                liste_scores.append([score, i])
                 beta = min(beta, score)
                 if beta <= alpha:
                     break
+        for i in range(len(liste_scores) - 1):
+            if liste_scores[i][0] != liste_scores[i + 1][0]:
+                pas_de_pire_score = False
+                break
+        if pas_de_pire_score:
+            return liste_scores[0][0], random.choice(liste_scores)[1]
         return pire_score, pire_colonne
