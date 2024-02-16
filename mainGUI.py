@@ -19,7 +19,7 @@ window = Tk()
 window.title('Puissance 4')
 window.geometry('1000x800')
 window.minsize(500, 300)
-window.iconbitmap("jeton/logo.ico")
+window.iconbitmap("image/logo.ico")
 window.config(background=COULEUR_ARRIERE_PLAN)
 
 
@@ -46,12 +46,18 @@ label_subtitle4.place(x=15,y=230)
 
     
     
-# Boutons pour lancer la partie joueur contre joueur
-bouton_jcj = Button(window, text = "Jouer à 2", command=lambda jcj = True: creer_frame_jeu(jcj))
+# Boutons pour lancer la partie
+bouton_jcj = Button(window, text = "Jouer à 2", command=lambda jcj = True, niveau_ordi = None: creer_frame_jeu(jcj, niveau_ordi))
 bouton_jcj.place(x =15, y = 270)
-# Boutons pour lancer la partie joueur contre ordinateur
-bouton_jco = Button(window, text = "Jouer contre l'ordinateur", command=lambda  jcj = False: creer_frame_jeu(jcj))
-bouton_jco.place(x =15, y = 320)
+
+bouton_ordinateur_facile = Button(window, text = "Jouer contre l'ordinateur - niveau facile", command=lambda  jcj = False, niveau_ordi = 5: creer_frame_jeu(jcj, niveau_ordi))
+bouton_ordinateur_facile.place(x =15, y = 320)
+
+bouton_ordinateur_moyen = Button(window, text = "Jouer contre l'ordinateur - niveau moyen", command=lambda  jcj = False, niveau_ordi = 7: creer_frame_jeu(jcj, niveau_ordi))
+bouton_ordinateur_moyen.place(x =15, y = 370)
+
+bouton_ordinateur_difficile = Button(window, text = "Jouer contre l'ordinateur - niveau difficile", command=lambda  jcj = False, niveau_ordi = 8: creer_frame_jeu(jcj, niveau_ordi))
+bouton_ordinateur_difficile.place(x =15, y = 420)
 
 
 def fin_de_partie(boutons, jcj, gagnant, texte_etat_partie, jetons_gagnants):
@@ -77,7 +83,7 @@ def fin_de_partie(boutons, jcj, gagnant, texte_etat_partie, jetons_gagnants):
         else:                       #si personne n'a gagné
             texte_etat_partie["text"] = "Match nul !"
     
-def placer_piece(plateau, boutons, jcj, colonne, piece_actuelle, texte_etat_partie):
+def placer_piece(plateau, boutons, jcj, colonne, piece_actuelle, texte_etat_partie, niveau_ordi):
     """Cette fonction sert à placer une pièce si le coup est valide et met fin à la partie 
     si le coup est gagnant"""
     if coup_valide(plateau, colonne):           #place la pièce seulement si la colonne n'est pas pleine
@@ -99,12 +105,12 @@ def placer_piece(plateau, boutons, jcj, colonne, piece_actuelle, texte_etat_part
                     for colonne in range(len(boutons[0])):
                         boutons[ligne][colonne]["state"] = DISABLED
                 threading.Thread(target=lambda plateau = plateau, boutons = boutons:
-                    ordinateur_placer_piece(plateau, boutons, texte_etat_partie)).start()
+                    ordinateur_placer_piece(plateau, boutons, texte_etat_partie, niveau_ordi)).start()
     
-def ordinateur_placer_piece(plateau, boutons, texte_etat_partie):
+def ordinateur_placer_piece(plateau, boutons, texte_etat_partie, niveau_ordi):
     """Cette fonction appelle l'ordinateur pour qu'il place une pièce et met fin à la partie
     si son coup est gagnant"""
-    colonne_ordi = minimax(copy.deepcopy(plateau), "O", 8, -numpy.inf, numpy.inf)[1]
+    colonne_ordi = minimax(copy.deepcopy(plateau), "O", niveau_ordi, -numpy.inf, numpy.inf)[1]
     stocker_piece(plateau, colonne_ordi, "O")
     boutons[obtenir_ligne(plateau, colonne_ordi) + 1][colonne_ordi].configure(bg = COULEUR_JETON_JAUNE)
     for ligne in range(len(boutons)):
@@ -117,7 +123,7 @@ def ordinateur_placer_piece(plateau, boutons, texte_etat_partie):
         fin_de_partie(boutons, False, None, texte_etat_partie, est_gagnant(plateau, "O")[1])
 
 #création d'une nouvelle fenetre   
-def creer_frame_jeu(joueur_contre_joueur):
+def creer_frame_jeu(joueur_contre_joueur, niveau_ordi = None):
     """Cette fonction sert à créer une nouvelle interface de jeu avec la grille de jeu et quel joueur
     doit jouer"""
     piece_actuelle = ["X"] # Cette variable contient le joueur à qui c'est le tour, 
@@ -146,7 +152,7 @@ def creer_frame_jeu(joueur_contre_joueur):
     # Ajout de l'événement au clic d'un bouton
     for ligne in range(len(boutons)):
         for colonne in range(len(boutons[0])):
-            boutons[ligne][colonne]["command"] = lambda colonne = colonne, plateau = plateau, piece_actuelle = piece_actuelle, texte_etat_partie = texte_etat_partie: placer_piece(plateau, boutons, jcj, colonne, piece_actuelle, texte_etat_partie)
+            boutons[ligne][colonne]["command"] = lambda colonne = colonne, plateau = plateau, piece_actuelle = piece_actuelle, texte_etat_partie = texte_etat_partie: placer_piece(plateau, boutons, jcj, colonne, piece_actuelle, texte_etat_partie, niveau_ordi)
     frame_jeu.pack(expand=True) 
     #Affiche la fenêtre de jeu
     win.mainloop()
